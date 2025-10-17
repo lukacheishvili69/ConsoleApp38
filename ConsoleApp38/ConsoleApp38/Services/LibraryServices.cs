@@ -46,71 +46,67 @@ public class LibraryServices : ILibraryServices
         var title = Console.ReadLine();
         Console.WriteLine("shemoikvane description");
         var description = Console.ReadLine();
+        
         Console.WriteLine("enter page count");
-        var PageCount = int.Parse(Console.ReadLine());
+        if (!int.TryParse(Console.ReadLine(), out var PageCount) || PageCount <= 0)
+        {
+            Console.WriteLine("Invalid page count");
+            return;
+        }
+        
         Console.WriteLine("enter book count");
-        var BookCount = int.Parse(Console.ReadLine());
+        if (!int.TryParse(Console.ReadLine(), out var BookCount) || BookCount <= 0)
+        {
+            Console.WriteLine("Invalid book count");
+            return;
+        }
+        
         Console.WriteLine("Is Best Seler? Yes-1 no-else");
-        var IsBestSale = false;
-        var BestSell = Console.ReadLine();
-        if (BestSell == "1") IsBestSale = true;
+        var IsBestSale = Console.ReadLine() == "1";
 
         Console.WriteLine("Enter Author Id:");
-        var id = int.Parse(Console.ReadLine());
+        if (!int.TryParse(Console.ReadLine(), out var id))
+        {
+            Console.WriteLine("Invalid author ID");
+            return;
+        }
+        
         var AllAuth = authorServices.Getall();
-        var author = AllAuth.FirstOrDefault(i => i.Id == id);
+        var author = AllAuth?.FirstOrDefault(i => i.Id == id);
 
-
+        if (author == null)
+        {
+            Console.WriteLine("Author not found");
+            return;
+        }
+        
         if (author.Books.Any(i => i.Tittle == title && i.Description == description))
         {
             Console.WriteLine("Msgavsi wigni arsebobs");
+            return;
         }
-        //else
-        //{
-        //    var AllBook = bookServices.Getall();
-            
-        //    var maxId = AllBook?.Any() == true ? AllBook.Max(i => i.Id) : 0;
-        //    var book = new Book
-        //    {
-        //        Id = maxId + 1,
-        //        Tittle = title,
-        //        Description = description,
-        //        Author = author
-
-        //    };
-        //    bookServices.Addnew(book);
-        //}
-
-
-        for (var i = 0; i < BookCount; i++)
-            {
-                var AllBooks = bookServices.Getall();
-                var MaxId = AllBooks.Any() == true ? AllBooks.Max(i => i.Id) : 0;
-                var book = new Book
-                {
-                    Id = MaxId + 1,
-                    Description = description,
-                    Author = author,
-                    Count = BookCount,
-                    IsBestSeller = IsBestSale,
-                    Pages = PageCount,
-                    Tittle = title
-                };
-                bookServices.Addnew(book);
-                Console.WriteLine("wigni warmatebit daemata");
-                if (author.Books.Any(i => i.Tittle == title && i.Description == description))
-                {
-                    Console.WriteLine("Msgavsi wigni arsebobs");
-                }
-                else
-                {
-                    author.Books.Add(book);
-                    authorServices.UpdateAt(book.Id, author);
-                Console.WriteLine("WIGNI warmatebit daemata");
-            }
-
-            }
+        
+        var AllBooks = bookServices.Getall();
+        var MaxId = AllBooks?.Any() == true ? AllBooks.Max(i => i.Id) : 0;
+        
+        var book = new Book
+        {
+            Id = MaxId + 1,
+            Description = description,
+            Author = author,
+            Count = BookCount,
+            IsBestSeller = IsBestSale,
+            Pages = PageCount,
+            Tittle = title
+        };
+        
+        bookServices.Addnew(book);
+        author.Books.Add(book);
+        authorServices.UpdateAt(author.Id, author);
+        
+        Console.WriteLine("wigni warmatebit daemata");
     }
+
     public void GetAllAuthors()
     {
         var authors = authorServices.Getall();
@@ -133,6 +129,7 @@ public class LibraryServices : ILibraryServices
             Console.WriteLine(author);
         }
     }
+
     public void GetAllBooks()
     {
         var books = bookServices.Getall();
